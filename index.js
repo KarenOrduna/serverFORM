@@ -18,6 +18,12 @@ const transporter = nodemailer.createTransport({
 
 app.post('/contact', (req, res) => {
   const { name, message, email } = req.body;
+  const { apiKey } = req.query;
+  if (apiKey !== process.env.API_KEY) {
+    res.status(401);
+    res.json({ error: 'wrong API key' });
+  }
+
   const mailOptions = {
     from: process.env.GMAIL_ACCOUNT,
     to: process.env.GMAIL_ACCOUNT,
