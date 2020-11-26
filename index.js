@@ -49,6 +49,37 @@ app.post('/contact', (req, res) => {
   });
 });
 
+app.post('/order', (req, res) => {
+  const { apiKey } = req.query;
+  if (apiKey !== process.env.API_KEY) {
+    res.status(401);
+    res.json({ error: 'wrong API key' });
+  }
+
+  const mailOptions = {
+    from: process.env.GMAIL_ACCOUNT,
+    to: process.env.GMAIL_ACCOUNT,
+    subject: `Nouvelle commande `,
+    text: `Vous avez reçu une nouvelle commande composée de :
+    ${req.body
+      .map((product) => `${product.product} : ${product.quantity} unités`)
+      .join('\n')}`,
+  };
+
+  transporter.sendMail(mailOptions, function (error, info) {
+    if (error) {
+      console.error(error);
+      res.status(500);
+      res.json({
+        errorMessage: 'There was a problem while sending the basket',
+      });
+    } else {
+      console.log('Email sent: ' + info.response);
+      res.json({ message: 'Panier envoyé avec succès' });
+    }
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`server listenting on port ${PORT}`);
 });
